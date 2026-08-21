@@ -1,0 +1,541 @@
+:root {
+    --nexora-navy: #070b2a;
+    --nexora-navy-light: #10143b;
+    --nexora-purple: #6650ff;
+    --nexora-violet: #a34cff;
+    --nexora-light-purple: #8f7dff;
+    --nexora-text-muted: #aeb3d5;
+  }
+  
+  .nexora-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  
+    min-height: 100vh;
+    overflow: hidden;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    color: #10142f;
+  
+    background:
+      radial-gradient(
+        circle at 50% 45%,
+        rgba(102, 80, 255, 0.12),
+        transparent 35%
+      ),
+      radial-gradient(
+        circle at 15% 85%,
+        rgba(163, 76, 255, 0.08),
+        transparent 30%
+      ),
+      #ffffff;
+  }
+ 
+  
+  /* Background glow */
+  
+  .nexora-loader__glow {
+    position: absolute;
+  
+    width: 500px;
+    height: 500px;
+  
+    border-radius: 50%;
+  
+    filter: blur(100px);
+    pointer-events: none;
+  }
+  
+  .glow-one {
+    top: -250px;
+    left: -150px;
+  
+    background: rgba(102, 80, 255, 0.2);
+  
+    animation: glowFloat 8s ease-in-out infinite;
+  }
+  
+  .glow-two {
+    right: -150px;
+    bottom: -250px;
+  
+    background: rgba(163, 76, 255, 0.16);
+  
+    animation:
+      glowFloat 10s ease-in-out infinite reverse;
+  }
+  
+  /* Main content */
+  
+  .nexora-loader__content {
+    position: relative;
+    z-index: 2;
+  
+    width: min(500px, 90%);
+  
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Brand */
+  
+  .nexora-loader__brand {
+    position: absolute;
+    top: -130px;
+  
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  
+  .nexora-loader__brand-mark {
+    width: 42px;
+    height: 42px;
+  
+    display: grid;
+    place-items: center;
+  
+    border-radius: 11px;
+  
+    transform: rotate(45deg);
+  
+    background:
+      linear-gradient(
+        135deg,
+        #8f7dff,
+        #5d4cff
+      );
+  
+    box-shadow:
+      0 0 35px rgba(109, 78, 255, 0.65);
+  }
+  
+  .nexora-loader__brand-mark span {
+    font-size: 23px;
+  
+    transform: rotate(-45deg);
+  }
+  
+  .nexora-loader__brand-name {
+    font-size: 21px;
+    font-weight: 800;
+  
+    letter-spacing: -0.5px;
+  }
+  
+  .nexora-loader__brand-sub {
+    margin-top: 2px;
+  
+    font-size: 12px;
+  
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  /* Visual */
+  
+  .nexora-loader__visual {
+    position: relative;
+  
+    width: 230px;
+    height: 230px;
+  
+    display: grid;
+    place-items: center;
+  }
+  
+  /* Orbit rings */
+  
+  .loader-orbit {
+    position: absolute;
+  
+    border-radius: 50%;
+  }
+  
+  .orbit-one {
+    width: 210px;
+    height: 210px;
+  
+    border: 1px solid rgba(143, 125, 255, 0.25);
+  
+    border-top-color: #8f7dff;
+    border-right-color: #6650ff;
+  
+    animation: spin 3s linear infinite;
+  }
+  
+  .orbit-two {
+    width: 165px;
+    height: 165px;
+  
+    border: 1px solid rgba(163, 76, 255, 0.22);
+  
+    border-bottom-color: #a34cff;
+    border-left-color: #8f7dff;
+  
+    animation: spinReverse 2.5s linear infinite;
+  }
+  
+  .orbit-three {
+    width: 120px;
+    height: 120px;
+  
+    border: 1px dashed rgba(180, 160, 255, 0.35);
+  
+    animation: spin 7s linear infinite;
+  }
+  
+  /* Center */
+  
+  .loader-core {
+    position: relative;
+  
+    width: 82px;
+    height: 82px;
+  
+    display: grid;
+    place-items: center;
+  
+    border-radius: 50%;
+  
+    background:
+      radial-gradient(
+        circle at 35% 30%,
+        #d8d2ff 0%,
+        #9b8cff 25%,
+        #6650ff 55%,
+        #4936d6 100%
+      );
+  
+    box-shadow:
+      0 8px 30px rgba(102, 80, 255, 0.35),
+      0 0 55px rgba(102, 80, 255, 0.22);
+  
+    animation: corePulse 2s ease-in-out infinite;
+  }
+  
+  .loader-core__inner {
+    width: 54px;
+    height: 54px;
+  
+    display: grid;
+    place-items: center;
+  
+    border-radius: 50%;
+  
+    font-size: 28px;
+  
+    color: white;
+  
+    background: linear-gradient(135deg, #cac1ff, #7061d0);
+  
+    box-shadow:
+      inset 0 2px 8px rgba(255, 255, 255, 0.3),
+      0 4px 15px rgba(61, 43, 180, 0.3);
+  }
+  
+  .loader-core::before {
+    content: "";
+  
+    position: absolute;
+    inset: -9px;
+  
+    border-radius: inherit;
+  
+    border: 1px solid rgba(102, 80, 255, 0.45);
+  
+    animation: pulseRing 2s ease-out infinite;
+  }
+  
+  
+  
+  /* Floating particles */
+  
+  .loader-particle {
+    position: absolute;
+  
+    width: 10px;
+    height: 10px;
+  
+    border-radius: 50%;
+  
+    background: #a34cff;
+  
+    box-shadow:
+      0 0 20px #a34cff;
+  }
+  
+  .particle-one {
+    top: 20px;
+    left: 40px;
+  
+    animation: particleFloatOne 3s ease-in-out infinite;
+  }
+  
+  .particle-two {
+    right: 15px;
+    bottom: 50px;
+  
+    width: 7px;
+    height: 7px;
+  
+    background: #8f7dff;
+  
+    animation: particleFloatTwo 4s ease-in-out infinite;
+  }
+  
+  .particle-three {
+    bottom: 15px;
+    left: 65px;
+  
+    width: 6px;
+    height: 6px;
+  
+    background: #ffffff;
+  
+    animation: particleFloatThree 3.5s ease-in-out infinite;
+  }
+  
+  /* Text */
+  
+  .nexora-loader__text {
+    width: 100%;
+  
+    margin-top: 25px;
+  
+    text-align: center;
+  }
+  
+  .nexora-loader__text h1 {
+    margin: 0 0 10px;
+  
+    font-size: 26px;
+    font-weight: 750;
+  
+    letter-spacing: -0.7px;
+  }
+  
+  .nexora-loader__text p {
+    margin: 0;
+  
+    color: var(--nexora-text-muted);
+  
+    font-size: 15px;
+  }
+  
+  /* Progress */
+  
+  .nexora-loader__progress {
+    width: 100%;
+    height: 4px;
+  
+    margin: 30px 0 14px;
+  
+    overflow: hidden;
+  
+    border-radius: 10px;
+  
+    background: #e8e7f5;
+  }
+  
+  .nexora-loader__progress-bar {
+    width: 40%;
+    height: 100%;
+  
+    border-radius: inherit;
+  
+    background:
+      linear-gradient(
+        90deg,
+        #6650ff,
+        #a34cff,
+        #8f7dff
+      );
+  
+    box-shadow:
+      0 0 15px rgba(163, 76, 255, 0.7);
+  
+    animation: progressMove 1.8s ease-in-out infinite;
+  }
+  
+  .nexora-loader__status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    gap: 5px;
+  
+    color: #8a8fae;
+  
+    font-size: 13px;
+  }
+  
+  .loading-dots {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .loading-dots i {
+    width: 4px;
+    height: 4px;
+  
+    display: block;
+  
+    border-radius: 50%;
+  
+    background: #9b78ff;
+  
+    animation: dotBounce 1.2s infinite;
+  }
+  
+  .loading-dots i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  
+  .loading-dots i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  
+  /* Animations */
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @keyframes spinReverse {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+  
+  @keyframes corePulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+  
+    50% {
+      transform: scale(1.08);
+    }
+  }
+  
+  @keyframes pulseRing {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.9;
+    }
+  
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes progressMove {
+    0% {
+      transform: translateX(-120%);
+    }
+  
+    100% {
+      transform: translateX(350%);
+    }
+  }
+  
+  @keyframes dotBounce {
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+  
+    30% {
+      transform: translateY(-5px);
+      opacity: 1;
+    }
+  }
+  
+ 
+  
+  @keyframes glowFloat {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+  
+    50% {
+      transform: translate(80px, 50px);
+    }
+  }
+  
+  @keyframes particleFloatOne {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+  
+    50% {
+      transform: translate(20px, 30px);
+    }
+  }
+  
+  @keyframes particleFloatTwo {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+  
+    50% {
+      transform: translate(-25px, -20px);
+    }
+  }
+  
+  @keyframes particleFloatThree {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+  
+    50% {
+      transform: translate(20px, -30px);
+    }
+  }
+  
+  /* Mobile */
+  
+  @media (max-width: 600px) {
+    .nexora-loader__brand {
+      top: -110px;
+    }
+  
+    .nexora-loader__visual {
+      width: 190px;
+      height: 190px;
+    }
+  
+    .orbit-one {
+      width: 180px;
+      height: 180px;
+    }
+  
+    .orbit-two {
+      width: 140px;
+      height: 140px;
+    }
+  
+    .orbit-three {
+      width: 105px;
+      height: 105px;
+    }
+  
+    .nexora-loader__text h1 {
+      font-size: 23px;
+    }
+  }
