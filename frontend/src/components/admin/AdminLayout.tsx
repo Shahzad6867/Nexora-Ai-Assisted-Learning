@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import AdminSidebar from "./AdminSidebar";
-import AdminTopbar from "./AdminTopbar";
 
 interface AdminLayoutProps {
   title: string;

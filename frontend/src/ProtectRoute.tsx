@@ -1,9 +1,10 @@
-import { jwtDecode } from 'jwt-decode';
+
+import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router'
-import type { CustomJwtPayload } from './pages/auth/Login.page';
+import type { RootState } from './app/store'
 
 export function ProtectRoute({children}){
-    const token = localStorage.getItem("token")
+  const {token} = useSelector((state : RootState) => state.auth)
     if(!token){
           return <Navigate to="/" replace />
     } 

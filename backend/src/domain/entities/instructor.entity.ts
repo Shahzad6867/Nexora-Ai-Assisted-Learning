@@ -1,3 +1,5 @@
+import { Roles } from "../enums/roles.enum";
+
 export class Instructor {
   constructor(
     public readonly institution_id: string,
@@ -11,8 +13,8 @@ export class Instructor {
     public date_of_birth: Date,
     public personal_email: string,
     public about: string,
-    public isBlocked: boolean,
-    public role: string,
+    public is_blocked: boolean,
+    public role: Roles.INSTRUCTOR,
     public qualification: {
       title: string;
       type: string;

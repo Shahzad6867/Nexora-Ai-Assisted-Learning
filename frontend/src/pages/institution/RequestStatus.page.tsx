@@ -30,28 +30,29 @@ export const STEP_LABELS: Record<string, string> = {
   rejected: "Rejected",
 };
 
-export default function RequestStatusPage({}) {
+export default function RequestStatusPage() {
   const navigate = useNavigate();
+  const params = useParams();
   const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
     dispatch(fetchRequest(params.id));
   }, []);
   const { request,loading } = useSelector((state: RootState) => state.request);
-  const params = useParams();
-  const timeline = request?.status_timeline ?? [];
-  const status = timeline[timeline?.length - 1]?.status ?? "Submitted";
+  const timeline = request !== null ? request.status_timeline : [];
+  const status = timeline.length > 0 ? timeline[timeline?.length - 1]?.status : "Submitted";
   const meta = STATUS_META[status];
 
   const onBackToOnboarding = () => {
-    navigate(`/institution/onboarding/${request.submitted_by}`);
+    navigate(`/institution/onboarding/${request ? request.submitted_by : ""}`);
   };
   const onGoToDashboard = () => {
     navigate("/institution/instructors");
   };
 
-  if(loading){
+  if(!request && loading){
     return (<LoadingPage />)
-  }else return (
+  }
+  return (
     <>
       <div className="nx-status-root">
         <div className="nx-status-page">

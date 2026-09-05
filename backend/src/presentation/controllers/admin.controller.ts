@@ -1,140 +1,99 @@
 import { Request, Response } from "express";
-import { GetInstitutionsUseCase } from "../../application/usecases/admin/getInstitutions.usecase";
-import { GetInstitutionAndRequestUseCase } from "../../application/usecases/admin/getInstitutionAndRequest.usecase";
-import { GetStudentsUseCase } from "../../application/usecases/admin/getStudents.usecase";
-import { GetRequestsUseCase } from "../../application/usecases/admin/getRequests.usecase";
-import { GetInstructorsUseCase } from "../../application/usecases/admin/getInstructors.usecase";
-import { UpdateRequestStatusUseCase } from "../../application/usecases/admin/updateRequestStatus.usecase";
+import { ResponseHelper } from "./helpers/response.helper";
+import { IGetInstitutionsUseCase } from "../../application/usecases/admin/getInstitutions/IGetInstitutions.usecase";
+import { IGetStudentsUseCase } from "../../application/usecases/admin/getStudents/IGetStudents.usecase";
+import { IGetRequestsUseCase } from "../../application/usecases/admin/getRequests/IGetRequests.usecase";
+import { IGetInstructorsUseCase } from "../../application/usecases/admin/getInstructors/IGetInstructors.usecase";
+import { IGetInstitutionAndRequestUseCase } from "../../application/usecases/admin/getInstitutionAndRequest/IGetInstitutionAndRequest";
+import { IUpdateRequestStatusUseCase } from "../../application/usecases/admin/updateRequestStatus/IUpdateRequestStatus.usecase";
+import { IUpdateIsBlockedEntitytUseCase } from "../../application/usecases/admin/updateIsBlockedEntity/IUpdateIsBlockedEntity.usecase";
+import { SortBy } from "../../domain/enums/sortBy.enum";
 
 export class AdminController {
   constructor(
-    private readonly getInstitutionsUseCase: GetInstitutionsUseCase,
-    private readonly getStudentsUseCase: GetStudentsUseCase,
-    private readonly getRequestsUseCase : GetRequestsUseCase,
-    private readonly getInstructorsUseCase : GetInstructorsUseCase,
-    private readonly getInstitutionAndRequestUseCase : GetInstitutionAndRequestUseCase,
-    private readonly updateRequestStatusUseCase : UpdateRequestStatusUseCase
+    private readonly _getInstitutionsUseCase: IGetInstitutionsUseCase,
+    private readonly _getStudentsUseCase: IGetStudentsUseCase,
+    private readonly _getRequestsUseCase: IGetRequestsUseCase,
+    private readonly _getInstructorsUseCase: IGetInstructorsUseCase,
+    private readonly _getInstitutionAndRequestUseCase: IGetInstitutionAndRequestUseCase,
+    private readonly _updateRequestStatusUseCase: IUpdateRequestStatusUseCase,
+    private readonly _updateIsBlockedEntityUseCase: IUpdateIsBlockedEntitytUseCase
   ) {}
 
   async getInstitutions(req: Request, res: Response): Promise<void> {
-    try {
-      const institutions = await this.getInstitutionsUseCase.execute();
-      res.status(201).json({
-        success: true,
-        institutions,
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const {page,itemsPerPage,sortBy,search} = req.query
+    const result = await this._getInstitutionsUseCase.execute(Number(page),Number(itemsPerPage),sortBy as SortBy,search as string | undefined);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Institutions fetched successfully",
+      result.statusCode
+    );
   }
 
-  async getInstitution(req : Request, res :Response) : Promise<void> {
-    try {
-      const _id = req.params._id as string
-      const response = await this.getInstitutionAndRequestUseCase.execute(_id);
-      res.status(201).json({
-        success: true,
-        ...response
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+  async getInstitution(req: Request, res: Response): Promise<void> {
+    const _id = req.params._id as string;
+    const result = await this._getInstitutionAndRequestUseCase.execute(_id);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Institution and Request fetched successfully",
+      result.statusCode
+    );
   }
 
   async getStudents(req: Request, res: Response): Promise<void> {
-    try {
-      const students = await this.getStudentsUseCase.execute();
-      res.status(201).json({
-        success: true,
-        students,
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const {page,itemsPerPage,sortBy,search} = req.query
+    const result = await this._getStudentsUseCase.execute(Number(page),Number(itemsPerPage),sortBy as SortBy,search as string | undefined);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Students fetched successfully",
+      result.statusCode
+    );
   }
   async getRequests(req: Request, res: Response): Promise<void> {
-    try {
-      const students = await this.getRequestsUseCase.execute();
-      res.status(201).json({
-        success: true,
-        students,
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const {page,itemsPerPage,search} = req.query
+    const result = await this._getRequestsUseCase.execute(Number(page),Number(itemsPerPage),search as string | undefined);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Requests fetched successfully",
+      result.statusCode
+    );
   }
   async getInstructors(req: Request, res: Response): Promise<void> {
-    try {
-      const instructors = await this.getInstructorsUseCase.execute();
-      res.status(201).json({
-        success: true,
-        instructors
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const {page,itemsPerPage,sortBy,search} = req.query
+    const result = await this._getInstructorsUseCase.execute(Number(page),Number(itemsPerPage),sortBy as SortBy,search as string | undefined);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Instructors fetched successfully",
+      result.statusCode
+    );
   }
 
-  async updateRequestStatus (req : Request, res : Response) : Promise<void> {
-    try {
-      const request_id = req.params._id as string
-       const institutionId = await this.updateRequestStatusUseCase.execute({request_id,...req.body});
-      const response = await this.getInstitutionAndRequestUseCase.execute(institutionId)
-      res.status(201).json({
-        success: true,
-        ...response
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+  async updateRequestStatus(req: Request, res: Response): Promise<void> {
+    const request_id = req.params._id as string;
+    const requestResult = await this._updateRequestStatusUseCase.execute({
+      request_id,
+      ...req.body,
+    });
+    const result = await this._getInstitutionAndRequestUseCase.execute(
+      requestResult.data!
+    );
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Request status updated successfully",
+      result.statusCode
+    );
   }
-  
+
+  async updateIsBlockedEntity(req: Request, res: Response) {
+    const result = await this._updateIsBlockedEntityUseCase.execute(
+      req.body
+    );
+    ResponseHelper.success(res, result.data, "Entity blocked successfully", result.statusCode);
+  }
 }

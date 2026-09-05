@@ -3,51 +3,52 @@ import type { PlatformRequest } from "../../types/types";
 import AdminLayout from "../../components/admin/AdminLayout";
 import Modal from "../../components/admin/Modal";
 import DetailGrid from "../../components/admin/DetailGrid";
-import CommentAlertIcon from '@iconify-react/mdi/comment-alert';
+import CommentAlertIcon from "@iconify-react/mdi/comment-alert";
 import { useNavigate } from "react-router";
 import type { AppDispatch, RootState } from "../../app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchEntities } from "../../features/adminSlice";
 import LoadingPage from "../Loader/Loading.page";
+import { AdminToolbar } from "../../components/admin/AdminToolbar";
+import Pagination from "../../components/admin/Pagination";
+import { formatDate } from "../../utilities/formatDateAndTime.utility";
 
-const INITIAL_REQUESTS: PlatformRequest[] = [
-  {
-    request_id: "onboarding-dit",
-    request_type: "Institution Onboarding Request",
-    submitted_by: {
-      institution_name : "Dubai Institute of Technology",
-      institution_id : "INSTIT-178677383487763FC702C"
-    },
-    submitted_on: "July 29, 2026",
-    status_timeline : [
-      {
-        status : "Submitted",
-        timestamp : new Date(),
-        note : null
-      }
-    ]
-  }
+const STATUS_FILTERS = [
+  { label: "All Requests", value: "all" },
+  { label: "Submitted", value: "Submitted" },
+  { label: "In Progress", value: "In Progress" },
+  { label: "Approved", value: "Approved" },
+  { label: "Rejected", value: "Rejected" },
 ];
-
 
 export default function RequestsPage() {
   const dispatch = useDispatch<AppDispatch>();
+  const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [sortBy, setSortBy] = useState("newest");
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [requestType, setRequestType] = useState("All Requests");
   useEffect(() => {
-    dispatch(fetchEntities());
-  }, []);
-  const {requests,loading} = useSelector((state : RootState) => state.admin)
+    dispatch(
+      fetchEntities({
+        page,
+        itemsPerPage,
+        searchByEntity: {
+          search,
+          entity: "requests",
+        },
+      })
+    );
+  }, [page, itemsPerPage, search]);
+  const { requests, loading } = useSelector((state: RootState) => state.admin);
   const [reviewing, setReviewing] = useState<PlatformRequest | null>(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  function resolveRequest(request: PlatformRequest, message: string) {
-    // setRequests((prev) => prev.filter((r) => r.request_id !== request.request_id));
-    setReviewing(null);
-    // showToast(message);
+  if (loading) {
+    return <LoadingPage />;
   }
-  if(loading){
-    return (<LoadingPage />)
-  }
-
 
   return (
     <AdminLayout title="Requests & Actions">
@@ -61,11 +62,29 @@ export default function RequestsPage() {
         </div>
       </div>
 
+      <AdminToolbar
+        search={search}
+        setSearch={setSearch}
+        searchPlaceholder="Type request id / submitted institution id . . ."
+        currentStatusFilter={statusFilter}
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+        setPage={setPage}
+        setStatusFilter={setStatusFilter}
+        status_filters={STATUS_FILTERS}
+        filterByRequestType={true}
+        requestType={requestType}
+        setRequestType={setRequestType}
+        sortByRequired={false}
+      />
+
       <div className="request-list">
-        {requests.map((req) => (
+        {requests.documents.map((req) => (
           <div className="request-card" key={req.request_id}>
             <div className="request-left">
-              <div className="request-icon"><CommentAlertIcon height="1em" /></div>
+              <div className="request-icon">
+                <CommentAlertIcon height="1em" />
+              </div>
               <div>
                 <div className="request-title">{req.request_type}</div>
                 <div className="request-description">{""}</div>
@@ -83,12 +102,18 @@ export default function RequestsPage() {
           </div>
         ))}
 
-        {requests.length === 0 && (
-          <p style={{ color: "var(--muted)", fontSize: 12 }}>
-            No pending requests right now.
-          </p>
+        {requests.documents.length === 0 && (
+          <div className="request-card" >
+              No requests found
+          </div>
         )}
       </div>
+
+      <Pagination
+        currentPage={page}
+        onPageChange={setPage}
+        totalPages={requests.totalPages}
+      />
 
       <Modal
         isOpen={reviewing !== null}
@@ -106,19 +131,22 @@ export default function RequestsPage() {
               </button>
               <button
                 className="btn btn-primary"
-                onClick={() => navigate(`/admin/institutions/${reviewing.submitted_by.institution_id}`)}
+                onClick={() =>
+                  navigate(
+                    `/admin/institutions/${reviewing.submitted_by.institution_id}`
+                  )
+                }
               >
                 View Institution
               </button>
-
             </>
           ) : (
             <button
-                className="btn btn-secondary"
-                onClick={() => setReviewing(null)}
-              >
-                Close
-              </button>
+              className="btn btn-secondary"
+              onClick={() => setReviewing(null)}
+            >
+              Close
+            </button>
           )
         }
       >
@@ -127,9 +155,21 @@ export default function RequestsPage() {
             <DetailGrid
               items={[
                 { label: "Request Type", value: reviewing.request_type },
-                { label: "Institution Name", value: reviewing.submitted_by.institution_name },
-                { label: "Submitted Date", value: new Date(reviewing.submitted_on).toLocaleDateString("en-US",{year : "numeric",month : "long",day : "2-digit"}) },
-                { label: "Current Status", value: reviewing.status_timeline[reviewing.status_timeline.length - 1].status },
+                {
+                  label: "Institution Name",
+                  value: reviewing.submitted_by.institution_name,
+                },
+                {
+                  label: "Submitted Date",
+                  value: formatDate(reviewing.submitted_on),
+                },
+                {
+                  label: "Current Status",
+                  value:
+                    reviewing.status_timeline[
+                      reviewing.status_timeline.length - 1
+                    ].status,
+                },
               ]}
             />
           </>

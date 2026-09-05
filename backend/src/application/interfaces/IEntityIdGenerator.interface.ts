@@ -1,4 +1,6 @@
+import { IdPrefix } from "../../domain/enums/idPrefix.enum";
+
 export interface IEntityIdGenerator {
-    generate : (role : string) => string
+    generate : (prefix : IdPrefix ) => string
 }
 

@@ -201,3 +201,81 @@ export interface Instructor {
 
 
 
+export type CourseStatus = "published" | "draft";
+
+export const COURSE_CATEGORIES = ["Technology", "Data Science", "Business", "Design"] as const;
+export type CourseCategory = (typeof COURSE_CATEGORIES)[number];
+
+export interface Subject {
+  id: string;
+  name: string;
+  instructorName: string;
+  /** Optional — not collected on original form, added so the chapter
+   *  count shown on the card is actually real data instead of static text. */
+  chapterCount: number;
+}
+
+export interface Module {
+  id: string;
+  name: string;
+  /** Optional short description — added because the card design shows
+   *  one, but the original "Add Module" modal never collected it. */
+  description: string;
+  totalMarks: number;
+  passingMarks: number;
+  assignmentRequired: boolean;
+  subjects: Subject[];
+}
+
+
+
+export interface CourseFormData {
+    institution_id ?: string,
+    course_name : string,
+    course_subtitle : string
+    description : string,
+    course_category : string,
+    price : number,
+    price_per_module : number
+}
+
+export interface ModuleFormData {
+  name: string;
+  description: string;
+  totalMarks: number;
+  passingMarks: number;
+  assignmentRequired: boolean;
+}
+
+export interface SubjectFormData {
+  name: string;
+  instructorName: string;
+  chapterCount: number;
+}
+
+export const INSTRUCTOR_OPTIONS = [
+  "Arun Raj — Senior Instructor",
+  "Sarah Khan — Instructor",
+  "John Mathew — Instructor",
+  "David Alex — Instructor",
+];
+
+export function categoryIcon(category: string): string {
+  switch (category) {
+    case "Technology":
+      return "</>";
+    case "Data Science":
+      return "AI";
+    case "Business":
+      return "BA";
+    case "Design":
+      return "UI";
+    default:
+      return "◈";
+  }
+}
+
+export function coverClass(index: number): string {
+  const classes = ["cover-one", "cover-two", "cover-three", "cover-four"];
+  return classes[index % classes.length];
+}

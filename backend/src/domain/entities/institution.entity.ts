@@ -1,3 +1,5 @@
+import { Roles } from "../enums/roles.enum";
+
 export class Institution {
   constructor(
     public readonly institution_id: string,
@@ -42,6 +44,6 @@ export class Institution {
     public educational_consent: boolean,
     public isVerified: boolean,
     public isBlocked: boolean,
-    public role : string
+    public role : Roles.INSTITUTION
   ) {}
 }

@@ -1,0 +1,3 @@
+export enum ADMIN_USECASE_MESSAGES {
+
+}

@@ -4,58 +4,57 @@ import { GoogleIcon } from "../../components/auth/GoogleIcon";
 import EyeOutlineIcon from "@iconify-react/mdi/eye-outline";
 import EyeOffOutlineIcon from "@iconify-react/mdi/eye-off-outline";
 import { Link, useLocation, useNavigate } from "react-router";
-import { useForm,  type FieldErrors } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
-import api from "../../api/auth";
+import api from "../../api/api";
 import { useDispatch } from "react-redux";
-import {startVerification} from "../../features/authSlice"
+import { startVerification } from "../../features/authSlice";
 
 interface MyFormInputs {
   first_name: string;
   last_name: string;
   age: number;
-  date_of_birth : Date;
-  email : string;
+  date_of_birth: Date;
+  email: string;
   password: string;
-  confirm_password : string,
-  role : string
+  confirm_password: string;
+  role: string;
 }
 
 export default function RegisterPage() {
-  const { register, handleSubmit,watch } = useForm <MyFormInputs>();
+  const { register, handleSubmit, watch } = useForm<MyFormInputs>();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const path = location.pathname.split("/");
   const role = path[1];
-  const passwordValue = watch("password")
-  let ageValue = watch("age")
-  const onSubmit = async (data : MyFormInputs) => {
+  const passwordValue = watch("password");
+  const ageValue = watch("age");
+  const onSubmit = async (data: MyFormInputs) => {
     try {
       delete data.confirm_password;
-      data.role = role
-      const response = await api.post(`/otp/register`,data)
-      console.log(response)
-      dispatch(startVerification(response.data))
-      navigate("/auth/verify/otp")
-      toast.info(response.data.message)
+      data.role = role;
+      const response = await api.post(`/otp/register`, data);
+      dispatch(startVerification(response.data));
+      navigate("/auth/verify/otp");
+      toast.info(response.data.message);
     } catch (error) {
-      toast.error(error?.response.data.message)
+      toast.error(error?.response.data.error);
     }
-  }
-  const onError = (errors : FieldErrors<MyFormInputs>) => {
+  };
+  const onError = (errors: FieldErrors<MyFormInputs>) => {
     const errorValues = Object.values(errors);
     if (errorValues.length > 0) {
       const firstError = errorValues[0];
-      
+
       // 3. Optional optional chaining safety check (?.)
       if (firstError?.message) {
         toast.error(firstError.message);
       }
     }
-  }
+  };
   return (
     <>
       <div className="nx-root">
@@ -112,7 +111,10 @@ export default function RegisterPage() {
               </p>
 
               {role === "student" && (
-                <Link to={"http://localhost:5000/api/auth/google"} className="nx-social">
+                <Link
+                  to={"http://localhost:5000/api/auth/google"}
+                  className="nx-social"
+                >
                   <GoogleIcon />
                   Continue with Google
                 </Link>
@@ -121,7 +123,7 @@ export default function RegisterPage() {
                 <div className="nx-divider">or continue with</div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit,onError)}>
+              <form onSubmit={handleSubmit(onSubmit, onError)}>
                 {role === "student" && (
                   <div className="nx-row">
                     <div>
@@ -165,7 +167,7 @@ export default function RegisterPage() {
                         {...register("date_of_birth", {
                           required: "Date of Birth is required",
                           validate: (value) => {
-                            if(isNaN(ageValue)) return "Age is required"
+                            if (isNaN(ageValue)) return "Age is required";
                             const today = new Date();
                             const birthDate = new Date(value);
 
@@ -181,8 +183,10 @@ export default function RegisterPage() {
                             ) {
                               age--;
                             }
-                            if(age < 13) return "You must be at least 13 years old to register"
-                            else if(age !== ageValue) return "Age does not match Date of Birth" 
+                            if (age < 13)
+                              return "You must be at least 13 years old to register";
+                            else if (age !== ageValue)
+                              return "Age does not match Date of Birth";
                           },
                         })}
                       />
@@ -245,7 +249,7 @@ export default function RegisterPage() {
                           value:
                             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
                           message:
-                            "Password must include uppercase, lowercase, a number, and a special character.",
+                            "Password must include uppercase, lowercase, a number, and a special character",
                         },
                       })}
                     />
@@ -276,12 +280,11 @@ export default function RegisterPage() {
                       id="confirmPassword"
                       type={showConfirm ? "text" : "password"}
                       placeholder="Confirm your password"
-                      {...register("confirm_password",{
-                        required : "Confirm Password is required",
-                        validate : (value) =>
-                        value === passwordValue ||
-                        "Passwords do not match"
-                    })}
+                      {...register("confirm_password", {
+                        required: "Confirm Password is required",
+                        validate: (value) =>
+                          value === passwordValue || "Passwords do not match",
+                      })}
                     />
                     <button
                       type="button"

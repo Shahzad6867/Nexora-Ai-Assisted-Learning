@@ -8,13 +8,6 @@ const LABEL: Record<RequestStatusKey, string> = {
   Resubmitted : "Resubmitted"
 };
 
-const CLASS: Record<RequestStatusKey, string> = {
-  Submitted: "status-pending",
-  "In Progress": "status-pending",
-  Approved: "status-active",
-  Rejected: "status-blocked",
-  Resubmitted : "status-pending"
-};
 
 export default function RequestStatusBadge({ status }: { status: RequestStatusKey }) {
   return (

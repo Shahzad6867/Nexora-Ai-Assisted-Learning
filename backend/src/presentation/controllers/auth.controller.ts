@@ -1,83 +1,63 @@
 import { Request, Response } from "express";
-import { StartOtpVerificationUseCase } from "../../application/usecases/auth/startOtpVerification.usecase";
-import { EndOtpVerificationUseCase } from "../../application/usecases/auth/endOtpVerification.usecase";
-import { UpdateAndResendOtpUseCase } from "../../application/usecases/auth/updateAndResendOtp.usecase";
-import { GoogleAuthBeforeDobUseCase } from "../../application/usecases/auth/googleAuthBeforeDob.usecase";
 import env from "../../config/env.config";
-import { GoogleAuthAfterDobUseCase } from "../../application/usecases/auth/googleAuthAfterDob.usecase";
-import { VerifyLoginCredentialsUseCase } from "../../application/usecases/auth/verifyLoginCredentials.usecase";
+import { Roles } from "../../domain/enums/roles.enum";
+import { ResponseHelper } from "./helpers/response.helper";
+import { AppError } from "../error/app.error";
+import { IStartOtpVerificationUseCase } from "../../application/usecases/auth/startOtpVerification/IStartOtpVerification.usecase";
+import { IUpdateAndResendOtpUseCase } from "../../application/usecases/auth/updateAndResendOtp/IUpdateAndResendOtp.usecase";
+import { IEndOtpVerificationUseCase } from "../../application/usecases/auth/endOtpVerification/IEndOtpVerification.usecase";
+import { IGoogleAuthBeforeDobUseCase } from "../../application/usecases/auth/googleAuthBeforeDob/IGoogleAuthBeforeDob.usecase";
+import { IGoogleAuthAfterDobUseCase } from "../../application/usecases/auth/googleAuthAfterDob/IGoogleAuthAfterDob.usecase";
+import { IVerifyLoginCredentialsUseCase } from "../../application/usecases/auth/verifyLoginCredentials/IVerifyLoginCredentials.usecase";
+import { ICreateAccessTokenUseCase } from "../../application/usecases/auth/createAccessToken/ICreateAccessToken.usecase";
+import { HTTP_STATUS_CODES } from "./httpStatusCodes/httpStatusCodes.enum";
 
 export class AuthController {
   constructor(
-    private readonly startOtpVerificationUseCase: StartOtpVerificationUseCase,
-    private readonly updateAndResendOtpUseCase: UpdateAndResendOtpUseCase,
-    private readonly endOtpVerificationUseCase: EndOtpVerificationUseCase,
-    private readonly googleAuthBeforeDobUseCase: GoogleAuthBeforeDobUseCase,
-    private readonly googleAuthAfterDobUseCase: GoogleAuthAfterDobUseCase,
-    private readonly verifyLoginCredentialsUseCase : VerifyLoginCredentialsUseCase
+    private readonly _startOtpVerificationUseCase: IStartOtpVerificationUseCase,
+    private readonly _updateAndResendOtpUseCase: IUpdateAndResendOtpUseCase,
+    private readonly _endOtpVerificationUseCase: IEndOtpVerificationUseCase,
+    private readonly _googleAuthBeforeDobUseCase: IGoogleAuthBeforeDobUseCase,
+    private readonly _googleAuthAfterDobUseCase: IGoogleAuthAfterDobUseCase,
+    private readonly _verifyLoginCredentialsUseCase: IVerifyLoginCredentialsUseCase,
+    private readonly _createAccessTokenUseCase: ICreateAccessTokenUseCase
   ) {}
 
   async registerOtpEntity(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.startOtpVerificationUseCase.execute(req.body);
-      res.status(201).json({
-        success: true,
-        message: "OTP has been sent to your provided email",
-        data: result,
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const result = await this._startOtpVerificationUseCase.execute(req.body);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "OTP has been sent to your provided email",
+      result.statusCode
+    );
   }
 
   async verifyOtpEntity(req: Request, res: Response): Promise<void> {
-    try {
-      const response = await this.endOtpVerificationUseCase.execute(req.body);
-      res.status(201).json({
-        success: true,
-        message: "OTP has been verified",
-        token : response
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const result = await this._endOtpVerificationUseCase.execute(req.body);
+    res.cookie("refreshToken", result.data?.refreshToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/api/refresh",
+    });
+    ResponseHelper.success(
+      res,
+      result.data?.accessToken,
+      "OTP has been verified",
+      result.statusCode
+    );
   }
 
   async resendOtp(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.updateAndResendOtpUseCase.execute(req.body);
-      res.status(201).json({
-        success: true,
-        message: "OTP has been resend to your provided email",
-        data: result,
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const result = await this._updateAndResendOtpUseCase.execute(req.body);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "OTP has been resend to your provided email",
+      result.statusCode
+    );
   }
 
   async googleCallback(req: Request, res: Response): Promise<void> {
@@ -85,64 +65,83 @@ export class AuthController {
       const googleUser = req.user;
 
       if (!googleUser) {
-        res.status(401).json({
-          message: "Google authentication failed",
+        throw new AppError("Google authentication failed!", 404);
+      }
+      const result = await this._googleAuthBeforeDobUseCase.execute(googleUser);
+      if (result.data?.refreshToken) {
+        res.cookie("refreshToken", result.data.refreshToken, {
+          httpOnly: true,
+          secure: env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          path: "/api/refresh",
         });
-        return;
       }
-      const redirectUrl = await this.googleAuthBeforeDobUseCase.execute(
-        googleUser
-      );
-      res.redirect(redirectUrl!);
+      res.redirect(result.data?.url!);
     } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.redirect(`${env.FRONTEND_URL}student/register`);
+      res.redirect(`${env.FRONTEND_URL}/${Roles.STUDENT}/register`);
     }
   }
 
   async verifyGoogleUserDob(req: Request, res: Response): Promise<void> {
     try {
-      const user = await this.googleAuthAfterDobUseCase.execute({
+      const result = await this._googleAuthAfterDobUseCase.execute({
         _id: req.params.id,
         ...req.body,
       });
-      res.status(201).json({
-        success: true,
-        message: "Google user has been registered",
-        data: user,
+      res.cookie("refreshToken", result.data?.refreshToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/api/refresh",
       });
+      ResponseHelper.success(
+        res,
+        result.data?.accessToken,
+        "Google user has been registered",
+        result.statusCode
+      );
     } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.redirect(`${env.FRONTEND_URL}/student/register`);
+      res.redirect(`${env.FRONTEND_URL}/${Roles.STUDENT}/register`);
     }
   }
 
-  async verifyLoginCredentials (req : Request , res : Response) : Promise<void> {
-    try{
-      const response = await this.verifyLoginCredentialsUseCase.execute(req.body)
-      res.status(201).json({
-        success : true,
-        message : "Welcome to Nexora 👋",
-        token : response
-      })
-    }catch(error){
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+  async verifyLoginCredentials(req: Request, res: Response): Promise<void> {
+    const result = await this._verifyLoginCredentialsUseCase.execute(req.body);
+    res.cookie("refreshToken", result.data?.refreshToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/api/refresh",
+    });
+    ResponseHelper.success(
+      res,
+      result.data?.accessToken,
+      "Authenticated",
+      result.statusCode
+    );
+  }
+
+  async createAccessToken(req: Request, res: Response): Promise<void> {
+    const refreshToken = req.cookies?.refreshToken;
+    const result = await this._createAccessTokenUseCase.execute(refreshToken);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Access Token created successfully",
+      result.statusCode
+    );
+  }
+
+  async logout (req : Request,res : Response) {
+    res.clearCookie("refreshToken",{
+      httpOnly : true,
+      secure : env.NODE_ENV === "production",
+      sameSite : "strict",
+      path : "/api/refresh"
+    })
+    ResponseHelper.success(res,null,"Logged out",HTTP_STATUS_CODES.OK)
   }
 }

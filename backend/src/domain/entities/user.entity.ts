@@ -1,3 +1,5 @@
+import { Roles } from "../enums/roles.enum";
+
 export class User {
     constructor(
         public readonly student_id : string,
@@ -9,7 +11,7 @@ export class User {
         public password : string | null,
         public profile_image : string | null,
         public is_blocked : boolean,
-        public role : string,
+        public role : Roles.STUDENT,
         public google_id ?: string | null
     ){}
 }

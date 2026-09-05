@@ -1,3 +1,4 @@
+import { Roles } from "../../domain/enums/roles.enum";
 import { RegisterInstitutionDTO } from "./institution.dto";
 import { RegisterUserDTO } from "./user.dto";
 
@@ -32,10 +33,15 @@ export interface RegisterOtpUserDTO {
   email: string;
   password: string;
   profile_image: string | null;
-  role : string
+  role : Roles.STUDENT
 }
 export interface RegisterOtpInstitutionDTO {
   email: string;
   password: string;
-  role: string;
+  role: Roles.INSTITUTION;
+}
+
+export interface TokenResponseDTO {
+  accessToken : string,
+  refreshToken : string
 }

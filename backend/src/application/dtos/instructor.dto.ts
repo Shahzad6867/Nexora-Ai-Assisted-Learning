@@ -1,3 +1,6 @@
+import { Roles } from "../../domain/enums/roles.enum";
+import { IInstructorDocument } from "../../infrastructure/mongodb/models/instructor.model";
+
 export interface CreateInstructorDTO {
   institution_id: string;
   instructor_id: string;
@@ -10,7 +13,7 @@ export interface CreateInstructorDTO {
   personal_email: string;
   about: string;
   isBlocked: boolean;
-  role: string;
+  role: Roles.INSTRUCTOR;
   qualification: {
     title: string;
     type: string;
@@ -18,4 +21,9 @@ export interface CreateInstructorDTO {
     issue_date: Date;
     document_url: string;
   };
+}
+
+export interface GetInstructorsResponseDTO {
+  documents: IInstructorDocument[];
+  totalPages: number;
 }

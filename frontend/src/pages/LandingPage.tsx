@@ -1,10 +1,10 @@
 import { useNavigate, useSearchParams } from "react-router";
 import Navbar from "../components/Navbar/Navbar";
 import "../styles/LandingPage.css"
-import { useSelector } from "react-redux";
-import type { RootState } from "../app/store";
 import { useEffect, useState } from "react";
 import LoadingPage from "./Loader/Loading.page";
+import { setToken } from "../features/authSlice";
+import { useDispatch } from "react-redux";
 
 type Role = "student" | "institution" | "instructor";
 
@@ -64,15 +64,16 @@ interface LandingPageProps {
 
 export default function LandingPage({onViewCourse }: LandingPageProps) {
   const [loading,setLoading] = useState(true)
+  const dispatch = useDispatch()
     const navigate = useNavigate()
   function scrollToCourses() {
     document.getElementById("nx-public-courses")?.scrollIntoView({ behavior: "smooth" });
   }
   const [searchParams] = useSearchParams()
   useEffect(() => {
-    const token = searchParams.get("token")
-    if(token){
-      localStorage.setItem("token",token)
+    const accesstoken = searchParams.get("accessToken")
+    if(accesstoken){
+      dispatch(setToken({ data : accesstoken}))
       navigate("/",{replace : true})
       setLoading(false)
     }else{

@@ -3,12 +3,14 @@ import Modal from "./Modal";
 import FileUpload from "./FileUpload";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
-import api from "../../api/auth";
+import api from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
 import { type AppDispatch, type RootState } from "../../app/store";
 import { fetchEntities } from "../../features/institutionSlice";
 import { jwtDecode } from "jwt-decode";
 import type { CustomJwtPayload } from "../../pages/auth/Login.page";
+import EyeOffOutlineIcon from "@iconify-react/mdi/eye-off-outline";
+import EyeOutlineIcon from "@iconify-react/mdi/eye-outline";
 
 interface AddInstructorModalProps {
   isOpen: boolean;
@@ -50,20 +52,19 @@ export default function AddInstructorModal({
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, watch, reset } = useForm();
   const ageValue = watch("age");
-  const { institution } = useSelector((state: RootState) => state.institution);
-  const token = localStorage.getItem("token")
+  const {token} = useSelector((state : RootState) => state.auth)
   const dispatch = useDispatch<AppDispatch>();
   const institutionToken = jwtDecode(token) as CustomJwtPayload;
   const onSubmit = async (data: Instructor) => {
     try {
       data.institution_id = institutionToken._id;
       const response = await api.post(`/institution/instructor/new`, data);
+      toast.success(response.data.message);
       dispatch(fetchEntities(institutionToken._id));
       onClose();
       reset();
     } catch (error: any) {
-      console.log(error);
-      toast.error(error?.response?.data?.message || "An error occurred");
+      toast.error(error?.response?.data?.error || "An error occurred");
     }
   };
 
@@ -183,7 +184,7 @@ export default function AddInstructorModal({
           label="Upload instructor image"
           hint="JPEG,PNG,JPG · Maximum 10MB"
           fileName={""}
-          onFileSelected={(fileName) => {}}
+          onFileSelected={() => {}}
           accept="image/*"
         />
 
@@ -217,7 +218,6 @@ export default function AddInstructorModal({
           />
         </div>
 
-
         <div className="field full">
           <label>Password</label>
           <div className="password-row">
@@ -238,6 +238,19 @@ export default function AddInstructorModal({
                 },
               })}
             />
+            <button
+              type="button"
+              className="password-eye"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              data-tooltip={showPassword ? "Hide password" : "Show password"}
+              onClick={() => setShowPassword((v) => !v)}
+            >
+              {showPassword ? (
+                <EyeOutlineIcon height="1em" />
+              ) : (
+                <EyeOffOutlineIcon height="1em" />
+              )}
+            </button>
           </div>
         </div>
 
@@ -305,7 +318,7 @@ export default function AddInstructorModal({
           label="Upload qualification document"
           hint="PDF · Maximum 10MB"
           fileName={""}
-          onFileSelected={(fileName) => {}}
+          onFileSelected={() => {}}
           accept="application/pdf"
         />
       </div>

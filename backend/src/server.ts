@@ -1,22 +1,24 @@
 import app from "./app";
 import env from "./config/env.config";
-import connectMongoDB from "./infrastrucutre/mongodb/connection";
-import { connectRedis } from "./infrastrucutre/redis/connection";
+import { WinstonLogger } from "./infrastructure/logger/logger";
+import connectMongoDB from "./infrastructure/mongodb/connection";
+import { connectRedis } from "./infrastructure/redis/connection";
 
-async function connectServerAndDb(){
-    try {
-        await connectMongoDB()
-        await connectRedis()
-        app.listen(env.PORT,(error) => {
-            if(error){
-                console.error("Something went wrong",error)
-            }
-            console.log("Server connected at PORT :",5000)
-        })
-    } catch (error) {
-        console.error("Something went wrong",error)
-        process.exit()
-    }
+
+const logger = new WinstonLogger()
+async function connectServerAndDb() {
+  try {
+    await connectMongoDB(logger);
+    await connectRedis();
+    app.listen(env.PORT, (error) => {
+      if (error) {
+        logger.error("Something went wrong", error.message);
+      }
+      logger.info("Server connected at PORT :", 5000);
+    });
+  } catch (error) {
+    logger.error("Something went wrong while connecting server");
+    process.exit();
+  }
 }
-connectServerAndDb()
-
+connectServerAndDb();

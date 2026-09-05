@@ -11,19 +11,20 @@ import LoadingPage from "./Loader/Loading.page";
 import { useNavigate } from "react-router";
 
 export default function WorkInProgressPage() {
-  const token = localStorage.getItem("token")
+  const {token} = useSelector((state : RootState) => state.auth)
   const entity = jwtDecode(token) as CustomJwtPayload
   const {institution,loading} = useSelector((state : RootState) => state.institution)
-  const {request} = useSelector((state : RootState) => state.request)
   const dispatch = useDispatch<AppDispatch>()
   useEffect(() => {
-    dispatch(fetchEntities(entity._id))
+    if(entity.role === "institution"){
+      dispatch(fetchEntities(entity._id))
+    }
   },[])
   const navigate = useNavigate()
   if(institution && !institution.isVerified){
     navigate(`/institution/onboarding/${entity._id}`)
   }
-  if(loading){
+  if(entity.role === "institution" && !institution && loading){
     return (
       <LoadingPage />
     )

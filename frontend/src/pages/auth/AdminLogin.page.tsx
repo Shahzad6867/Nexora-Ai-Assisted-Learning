@@ -1,16 +1,14 @@
 import { useState } from "react";
 import "../../styles/auth/Auth.css";
-import { GoogleIcon } from "../../components/auth/GoogleIcon";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import EyeOffOutlineIcon from "@iconify-react/mdi/eye-off-outline";
 import EyeOutlineIcon from "@iconify-react/mdi/eye-outline";
-import api from "../../api/auth";
+import api from "../../api/api";
 import { toast } from "sonner";
-import { useDispatch } from "react-redux";
 import { useForm, type FieldErrors } from "react-hook-form";
-import { jwtDecode, type JwtPayload } from "jwt-decode";
-import { fetchEntities } from "../../features/institutionSlice";
-import type { AppDispatch } from "../../app/store";
+import { type JwtPayload } from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { setToken } from "../../features/authSlice";
 
 interface LoginFormInputs {
   email: string;
@@ -19,32 +17,28 @@ interface LoginFormInputs {
 }
 
 export interface CustomJwtPayload extends JwtPayload {
-  _id : string,
-  role : string
+  _id: string;
+  role: string;
 }
 
 export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const {register,handleSubmit} = useForm<LoginFormInputs>()
+  const { register, handleSubmit } = useForm<LoginFormInputs>();
   const location = useLocation();
-  const dispatch = useDispatch<AppDispatch>()
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const path = location.pathname.split("/");
   const role = path[1];
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      console.log(data)
       data.role = role;
       const response = await api.post(`/login`, data);
-      localStorage.setItem("token",response.data.token)
-      if(role === "institution"){
-        const institution = jwtDecode(response.data.token) as CustomJwtPayload
-        dispatch(fetchEntities(institution._id as string))
-      }
-      role === "student" ? navigate("/") : navigate(`/${role}/dashboard`)
+      dispatch(setToken(response.data));
+      navigate(`/${role}/dashboard`);
+      console.log(response);
       toast.info(response.data.message);
     } catch (error) {
-      toast.error(error?.response.data.message);
+      toast.error(error?.response.data.error);
     }
   };
   const onError = (errors: FieldErrors<LoginFormInputs>) => {
@@ -74,22 +68,17 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          <div className="nx-content" style={{display : "flex" , gap : "0px",justifyContent : "center"}}>
-            
-
+          <div
+            className="nx-content"
+            style={{ display: "flex", gap: "0px", justifyContent: "center" }}
+          >
             <section
               className="nx-card"
-              style={{ height: "400px", marginTop: "70px", marginLeft : "0px"  }
-              }
+              style={{ height: "400px", marginTop: "70px", marginLeft: "0px" }}
             >
-              <h2 style={{textAlign : "center"}}>Admin Login
-              </h2>
+              <h2 style={{ textAlign: "center" }}>Admin Login</h2>
 
-
-
-
-
-              <form onSubmit={handleSubmit(onSubmit,onError)}>
+              <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <div className="nx-field">
                   <label htmlFor="email">Email</label>
                   <input
@@ -153,8 +142,6 @@ export default function AdminLoginPage() {
                   <span style={{ fontWeight: "700" }}>Log in</span>
                 </button>
               </form>
-
-              
             </section>
           </div>
         </div>

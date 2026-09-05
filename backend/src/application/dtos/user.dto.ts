@@ -1,3 +1,6 @@
+import { Roles } from "../../domain/enums/roles.enum";
+import { IUserDocument } from "../../infrastructure/mongodb/models/user.model";
+
 export interface RegisterUserDTO {
   first_name: string;
   last_name: string;
@@ -6,19 +9,12 @@ export interface RegisterUserDTO {
   email: string;
   password: string | null;
   profile_image: string | null;
-  role: string;
+  role: Roles.STUDENT;
   google_id?: string | null;
 }
-export interface RegisterUserResponseDTO {
-  student_id: string;
-  first_name: string;
-  last_name: string;
-  age: number;
-  date_of_birth: Date;
-  email: string;
-  profile_image: string | null;
-  role: string;
-  is_blocked: boolean;
+export interface GetUsersResponseDTO {
+  documents: IUserDocument[];
+  totalPages: number;
 }
 
 export interface GoogleUserDTO {
@@ -27,7 +23,7 @@ export interface GoogleUserDTO {
   email: string;
   profile_image: string | null;
   google_id: string;
-  role?: string;
+  role?: Roles.STUDENT;
 }
 export interface GoogleUserDobDTO {
   _id: string;
@@ -44,4 +40,9 @@ export interface LoginCredentialsDTO {
   email: string;
   password: string;
   role: string;
+}
+
+export interface GoogleAuthResponseDTO {
+  url: string;
+  refreshToken ?: string;
 }

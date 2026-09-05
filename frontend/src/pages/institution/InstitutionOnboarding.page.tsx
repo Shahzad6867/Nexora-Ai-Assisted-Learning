@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../../styles/InstitutionOnboarding.css";
 import { useForm, type FieldErrors } from "react-hook-form";
-import api from "../../api/auth";
+import api from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../app/store";
 import { fetchEntities, updateProfile } from "../../features/institutionSlice";
@@ -71,7 +71,7 @@ const STEPS = ["Institution", "Contact", "Address", "Legal", "Bank", "Review"];
 export default function InstitutionOnboardingPage() {
   const legalDocumentInputRef = useRef<HTMLInputElement | null>(null);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [legalDocumentName, setLegalDocumentName] = useState("");
   const [isDocumentDragging, setIsDocumentDragging] = useState(false);
 
@@ -82,9 +82,10 @@ export default function InstitutionOnboardingPage() {
 
   const { register, handleSubmit, reset, setValue, clearErrors } = useForm();
   const dispatch = useDispatch<AppDispatch>();
-  const { institution,loading } = useSelector((state: RootState) => state.institution);
+  const { institution, loading } = useSelector(
+    (state: RootState) => state.institution
+  );
   const { request } = useSelector((state: RootState) => state.request);
-
   const params = useParams();
 
   useEffect(() => {
@@ -145,28 +146,29 @@ export default function InstitutionOnboardingPage() {
       }
 
       const response = await api.patch(`/institution/${params.id}`, payload);
-      dispatch(updateProfile(response.data.institution));
+      dispatch(updateProfile(response.data.data));
       if (currentStep === 6) {
-        if(request === null){
+        if (request === null) {
           const newRequest = {
             submitted_by: params.id,
             request_type: "Institution Onboarding Request",
             note: data?.note,
           };
-         const response = await api.post("/requests/new",newRequest);
-          navigate(`/institution/requests/${response.data.request.request_id}`)
-        }else{
-          const response = await api.put(`/requests/${request.request_id}/resubmit`,{
-            status_type : "Resubmitted",
-            status_note : data?.note
+          const response = await api.post("/requests/new", newRequest);
+          navigate(`/institution/requests/${response.data.data.request_id}`);
+        } else {
+          await api.put(`/requests/${request.request_id}/resubmit`, {
+            status_type: "Resubmitted",
+            status_note: data?.note,
           });
-          navigate(`/institution/requests/${request.request_id}`)
+          navigate(`/institution/requests/${request.request_id}`);
         }
-        
       }
-      if(currentStep < 6) setCurrentStep((prev) => prev + 1);
+      if (currentStep < 6) setCurrentStep((prev) => prev + 1);
+      toast.success(response.data.message);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "An error occurred");
+      console.log(error);
+      toast.error(error?.response?.data?.error || "An error occurred");
     }
   };
 
@@ -189,10 +191,8 @@ export default function InstitutionOnboardingPage() {
     }
   };
 
-  if(loading){
-    return (
-      <LoadingPage />
-    )
+  if (loading) {
+    return <LoadingPage />;
   }
 
   return (
@@ -317,7 +317,6 @@ export default function InstitutionOnboardingPage() {
                         const file = e.target.files?.[0];
                         handleFileSelect(file, "institution_logo", setLogoName);
                       }}
-                     
                     />
                   </div>
                 </div>

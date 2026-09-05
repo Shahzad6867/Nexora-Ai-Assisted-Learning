@@ -4,13 +4,14 @@ import { GoogleIcon } from "../../components/auth/GoogleIcon";
 import { Link, useLocation, useNavigate } from "react-router";
 import EyeOffOutlineIcon from "@iconify-react/mdi/eye-off-outline";
 import EyeOutlineIcon from "@iconify-react/mdi/eye-outline";
-import api from "../../api/auth";
+import api from "../../api/api";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import { fetchEntities } from "../../features/institutionSlice";
 import type { AppDispatch } from "../../app/store";
+import { setToken } from "../../features/authSlice";
 
 interface LoginFormInputs {
   email: string;
@@ -19,32 +20,32 @@ interface LoginFormInputs {
 }
 
 export interface CustomJwtPayload extends JwtPayload {
-  _id : string,
-  role : string
+  _id: string;
+  role: string;
 }
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const {register,handleSubmit} = useForm<LoginFormInputs>()
+  const { register, handleSubmit } = useForm<LoginFormInputs>();
   const location = useLocation();
-  const dispatch = useDispatch<AppDispatch>()
-  const navigate = useNavigate()
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const path = location.pathname.split("/");
   const role = path[1];
   const onSubmit = async (data: LoginFormInputs) => {
     try {
       data.role = role;
       const response = await api.post(`/login`, data);
-      localStorage.setItem("token",response.data.token)
-      if(role === "institution"){
-        const institution = jwtDecode(response.data.token) as CustomJwtPayload
-        dispatch(fetchEntities(institution._id as string))
+      dispatch(setToken(response.data));
+      if (role === "institution") {
+        const institution = jwtDecode(response.data.data) as CustomJwtPayload;
+        dispatch(fetchEntities(institution._id as string));
       }
-      role === "student" ? navigate("/") : navigate(`/${role}/dashboard`)
-      toast.info(response.data.message);
+      role === "student" ? navigate("/") : navigate(`/${role}/dashboard`);
+      toast.success(response.data.message);
     } catch (error) {
-
-      toast.error(error?.response.data.message);
+      console.log(error.response);
+      toast.error(error?.response?.data?.error);
     }
   };
   const onError = (errors: FieldErrors<LoginFormInputs>) => {
@@ -122,7 +123,11 @@ export default function LoginPage() {
               </p>
 
               {role === "student" && (
-                <Link to="http://localhost:5000/api/auth/google"  className="nx-social" type="button">
+                <Link
+                  to="http://localhost:5000/api/auth/google"
+                  className="nx-social"
+                  type="button"
+                >
                   <GoogleIcon />
                   Continue with Google
                 </Link>
@@ -132,7 +137,7 @@ export default function LoginPage() {
                 <div className="nx-divider">or continue with</div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit,onError)}>
+              <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <div className="nx-field">
                   <label htmlFor="email">Email</label>
                   <input

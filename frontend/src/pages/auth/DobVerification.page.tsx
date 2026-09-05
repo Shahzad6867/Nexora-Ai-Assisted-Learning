@@ -1,20 +1,27 @@
 import "../../styles/auth/OtpVerification.css";
 import { toast } from "sonner";
-import api from "../../api/auth";
+import api from "../../api/api";
 import { useNavigate, useParams } from "react-router";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { setToken } from "../../features/authSlice";
 
 interface MyFormInputs {
   age: number;
   date_of_birth: Date;
 }
-
+export const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+};
 export default function DobVerificationPage() {
-  const params = useParams()
-  const { register, handleSubmit, watch} = useForm<MyFormInputs>();
+  const params = useParams();
+  const { register, handleSubmit, watch } = useForm<MyFormInputs>();
   const TOTAL_TIME = 600; // 10 minutes in seconds
   const [timeLeft, setTimeLeft] = useState<number>(TOTAL_TIME);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const ageValue = watch("age");
@@ -24,8 +31,10 @@ export default function DobVerificationPage() {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           clearInterval(timer);
-          navigate("/student/register"); 
-          toast.error("Registration session expired. Please register again via Google.");
+          navigate("/student/register");
+          toast.error(
+            "Registration session expired. Please register again via Google."
+          );
           return 0;
         }
         return prevTime - 1;
@@ -36,34 +45,30 @@ export default function DobVerificationPage() {
   }, [navigate]);
 
   // Helper function to format seconds into MM:SS string
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
 
   const onSubmit = async (data: MyFormInputs) => {
     try {
-      
       const response = await api.post(`/dob/verify/${params.id}`, data);
-      console.log(response.data);
+      console.log(response)
+      dispatch(setToken(response.data));
       navigate("/");
       toast.success("Welcome to Nexora 👋");
     } catch (error) {
-      toast.error("Verification failed. Please try again.");
+      console.log(error)
+      toast.error("An error occurred");
     }
   };
-  const onError = (errors : FieldErrors<MyFormInputs>) => {
+  const onError = (errors: FieldErrors<MyFormInputs>) => {
     const errorValues = Object.values(errors);
     if (errorValues.length > 0) {
       const firstError = errorValues[0];
-      
+
       // 3. Optional optional chaining safety check (?.)
       if (firstError?.message) {
         toast.error(firstError.message);
       }
     }
-  }
+  };
 
   return (
     <>
@@ -84,8 +89,10 @@ export default function DobVerificationPage() {
 
           {/* Main Card Content */}
           <div className="nx-content-otp">
-            <section className="nx-card-otp" style={{ display: 'flex', flexDirection: 'column' }}>
-              
+            <section
+              className="nx-card-otp"
+              style={{ display: "flex", flexDirection: "column" }}
+            >
               {/* Top Anti-Refresh Alert Capsule */}
               <div
                 style={{
@@ -111,23 +118,41 @@ export default function DobVerificationPage() {
               </div>
 
               {/* Title Section */}
-              <h1 style={{ margin: "0 0 2px 0", fontSize: "24px", fontWeight: "700", color: "#00023b", }}>
+              <h1
+                style={{
+                  margin: "0 0 2px 0",
+                  fontSize: "24px",
+                  fontWeight: "700",
+                  color: "#00023b",
+                }}
+              >
                 Complete Your Profile
               </h1>
-              <p className="nx-intro" style={{ textAlign: "start", marginBottom: "20px", marginTop: "0" , fontSize : "12px" , color : "#4b4b52"}}>
+              <p
+                className="nx-intro"
+                style={{
+                  textAlign: "start",
+                  marginBottom: "20px",
+                  marginTop: "0",
+                  fontSize: "12px",
+                  color: "#4b4b52",
+                }}
+              >
                 Enter your date of birth and age to finish registration
               </p>
 
               {/* Form Element */}
-              <form onSubmit={handleSubmit(onSubmit,onError)}>
+              <form onSubmit={handleSubmit(onSubmit, onError)}>
                 <div className="nx-row">
                   <div>
-                    <label htmlFor="dateOfBirth" style={{paddingLeft : "6px"}}>Date of Birth</label>
+                    <label htmlFor="dateOfBirth" style={{ paddingLeft: "6px" }}>
+                      Date of Birth
+                    </label>
                     <input
                       type="date"
                       id="dateOfBirth"
                       placeholder="Date of Birth"
-                      style={{ marginTop : "6px"}}
+                      style={{ marginTop: "6px" }}
                       {...register("date_of_birth", {
                         required: "Date of Birth is required",
                         validate: (value) => {
@@ -135,37 +160,45 @@ export default function DobVerificationPage() {
                           const today = new Date();
                           const birthDate = new Date(value);
 
-                          let age = today.getFullYear() - birthDate.getFullYear();
-                          const monthDiff = today.getMonth() - birthDate.getMonth();
+                          let age =
+                            today.getFullYear() - birthDate.getFullYear();
+                          const monthDiff =
+                            today.getMonth() - birthDate.getMonth();
 
                           if (
                             monthDiff < 0 ||
-                            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+                            (monthDiff === 0 &&
+                              today.getDate() < birthDate.getDate())
                           ) {
                             age--;
                           }
-                          if (age < 13) return "You must be at least 13 years old to register";
-                          if (age !== ageValue) return "Age does not match Date of Birth";
+                          if (age < 13)
+                            return "You must be at least 13 years old to register";
+                          if (age !== ageValue)
+                            return "Age does not match Date of Birth";
                         },
                       })}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="age" style={{paddingLeft : "6px"}}>Age</label>
+                    <label htmlFor="age" style={{ paddingLeft: "6px" }}>
+                      Age
+                    </label>
                     <input
                       id="age"
                       type="number"
                       onWheel={(e) => e.currentTarget.blur()}
                       min={0}
                       placeholder="Enter your age"
-                      style={{ marginTop : "6px"}}
+                      style={{ marginTop: "6px" }}
                       {...register("age", {
                         required: "Age is required",
                         valueAsNumber: true,
                         min: {
                           value: 13,
-                          message: "You must be at least 13 years old to register",
+                          message:
+                            "You must be at least 13 years old to register",
                         },
                       })}
                     />
@@ -186,30 +219,45 @@ export default function DobVerificationPage() {
 
               {/* Polished Bottom Timer Component */}
               <div style={{ textAlign: "center", marginTop: "28px" }}>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", justifyContent: "center" }}>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    justifyContent: "center",
+                  }}
+                >
                   <button
                     type="button"
                     disabled
-                    style={{ 
+                    style={{
                       cursor: "not-allowed",
                       fontSize: "15px",
-                      color : "#565259"
+                      color: "#565259",
                     }}
                   >
                     Registration expires in
                   </button>{" "}
-                  <span style={{ fontWeight: "600", color: "#a34cff", fontSize: "15px", letterSpacing: "0.5px" }}>
+                  <span
+                    style={{
+                      fontWeight: "600",
+                      color: "#a34cff",
+                      fontSize: "15px",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
                     {formatTime(timeLeft)}
                   </span>
                 </div>
-                
+
                 {/* Secondary Helpful Footnote */}
                 <p className="nx-footer">
-                  Once the countdown hits zero, your verification state will be dropped.<br />
+                  Once the countdown hits zero, your verification state will be
+                  dropped.
+                  <br />
                   You will need to re-authenticate through Google to try again.
                 </p>
               </div>
-
             </section>
           </div>
         </div>

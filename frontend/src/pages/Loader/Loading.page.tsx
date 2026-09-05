@@ -1,12 +1,6 @@
 import "./LoadingPage.css";
 
-interface LoadingPageProps {
-  message?: string;
-}
-
-const LoadingPage = ({
-  message = "Preparing your learning experience...",
-}: LoadingPageProps) => {
+const LoadingPage = () => {
   return (
     <div className="nexora-loader">
 

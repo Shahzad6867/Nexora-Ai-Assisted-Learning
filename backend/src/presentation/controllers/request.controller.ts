@@ -1,73 +1,47 @@
 import { Request, Response } from "express";
-import { CreateRequestUseCase } from "../../application/usecases/request/createRequest.usecase";
-import { GetRequestUseCase } from "../../application/usecases/request/getRequest.usecase";
-import { UpdateRequestStatusUseCase } from "../../application/usecases/admin/updateRequestStatus.usecase";
+import { ResponseHelper } from "./helpers/response.helper";
+import { ICreateRequestUseCase } from "../../application/usecases/request/createRequest/ICreateRequest.usecase";
+import { IGetRequestUseCase } from "../../application/usecases/request/getRequest/IGetRequest.usecase";
+import { IUpdateRequestStatusUseCase } from "../../application/usecases/admin/updateRequestStatus/IUpdateRequestStatus.usecase";
 
 export class RequestController {
-  constructor(private readonly createRequestUseCase: CreateRequestUseCase,
-    private readonly getRequestUseCase : GetRequestUseCase,
-    private readonly updateRequestStatusUseCase : UpdateRequestStatusUseCase
+  constructor(
+    private readonly _createRequestUseCase: ICreateRequestUseCase,
+    private readonly _getRequestUseCase: IGetRequestUseCase,
+    private readonly _updateRequestStatusUseCase: IUpdateRequestStatusUseCase
   ) {}
 
   async createRequest(req: Request, res: Response): Promise<void> {
-    try {
-      const request = await this.createRequestUseCase.execute(req.body);
-      res.status(201).json({
-        success: true,
-        request,
-      });
-    } catch (error) {
-      let errorMessage = null;
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      console.log(error);
-      res.status(500).json({
-        success: false,
-        message: errorMessage ?? "Something went wrong",
-      });
-    }
+    const result = await this._createRequestUseCase.execute(req.body);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Request created successfully",
+      result.statusCode
+    );
   }
 
-  async getRequest(req : Request,res : Response) : Promise<void> {
-    try {
-        const _id = req.params._id as string
-        const request = await this.getRequestUseCase.execute(_id);
-        res.status(201).json({
-          success: true,
-          request,
-        });
-      } catch (error) {
-        let errorMessage = null;
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        console.log(error);
-        res.status(500).json({
-          success: false,
-          message: errorMessage ?? "Something went wrong",
-        });
-      }
+  async getRequest(req: Request, res: Response): Promise<void> {
+    const _id = req.params._id as string;
+    const result = await this._getRequestUseCase.execute(_id);
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Request fetched successfully",
+      result.statusCode
+    );
   }
-  async updateRequest(req : Request,res : Response) : Promise<void> {
-    try {
-        const _id = req.params._id as string
-        console.log(_id)
-        const request = await this.updateRequestStatusUseCase.execute({request_id :_id,...req.body});
-        res.status(201).json({
-          success: true,
-          request,
-        });
-      } catch (error) {
-        let errorMessage = null;
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        console.log(error);
-        res.status(500).json({
-          success: false,
-          message: errorMessage ?? "Something went wrong",
-        });
-      }
+  async updateRequest(req: Request, res: Response): Promise<void> {
+    const _id = req.params._id as string;
+    const result = await this._updateRequestStatusUseCase.execute({
+      request_id: _id,
+      ...req.body,
+    });
+    ResponseHelper.success(
+      res,
+      result.data,
+      "Request status updated successfully",
+      result.statusCode
+    );
   }
 }

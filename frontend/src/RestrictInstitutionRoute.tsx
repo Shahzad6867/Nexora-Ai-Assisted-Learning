@@ -1,12 +1,12 @@
 import { jwtDecode } from "jwt-decode";
 import { Navigate } from "react-router";
 import type { CustomJwtPayload } from "./pages/auth/Login.page";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "./app/store";
-import { fetchEntities } from "./features/institutionSlice";
+import type { RootState } from "./app/store";
+import { useSelector } from "react-redux";
+
 
 export function RestrictInstitutionRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const {token} = useSelector((state : RootState) => state.auth)
   if (token) {
     const entity = jwtDecode(token) as CustomJwtPayload;
     if (entity.role !== "institution") {

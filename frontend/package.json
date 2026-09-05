@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@iconify-react/hugeicons": "^1.0.13",
+    "@iconify-react/mage": "^1.0.2",
     "@iconify-react/mdi": "^1.0.2",
     "@iconify-react/tdesign": "^1.0.7",
     "@reduxjs/toolkit": "^2.12.0",
