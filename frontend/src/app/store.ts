@@ -3,14 +3,15 @@ import authSliceReducer from "../features/authSlice";
 import adminSliceReducer from "../features/adminSlice";
 import institutionSliceReducer from "../features/institutionSlice";
 import requestSliceReducer from "../features/requestSlice";
-import api from "../api/api";
+import instructorSliceReducer from "../features/instructorSlice";
 
 
 const appReducer = combineReducers({
     auth: authSliceReducer,
     admin: adminSliceReducer,
     institution: institutionSliceReducer,
-    request: requestSliceReducer
+    request: requestSliceReducer,
+    instructor : instructorSliceReducer
 });
 
 

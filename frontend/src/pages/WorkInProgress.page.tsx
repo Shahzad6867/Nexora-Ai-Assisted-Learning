@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { fetchEntities } from "../features/institutionSlice";
 import LoadingPage from "./Loader/Loading.page";
 import { useNavigate } from "react-router";
+import InstructorLayout from "../components/instructor/InstructorLayout";
 
 export default function WorkInProgressPage() {
   const {token} = useSelector((state : RootState) => state.auth)
@@ -51,13 +52,13 @@ export default function WorkInProgressPage() {
 
   }else if(entity.role === "instructor"){
     return (
-      <InstitutionLayout name="Dummy University">
+      <InstructorLayout >
          <div className="page-header">
           <div>
             <h1>Work in progress 😊</h1>
           </div>
         </div>
-      </InstitutionLayout>
+      </InstructorLayout>
     )
   }
   

@@ -8,23 +8,23 @@ const initialState = {
     loading : true,
     token : null
 }
-
 const logoutEntity = createAsyncThunk(
     "auth/logoutEntity",
-    async (_,{dispatch}) => {
+    async (_, { dispatch, rejectWithValue }) => {
       try {
-         await api.get("logout");
+        await api.get("/logout");
       } catch (error) {
-        console.log(error);
-        toast.error(error.response.data.error || "an error occured");
-      }finally{
-        dispatch({type : "auth/logout"})
-        toast.success("Logged out")
+        const errorMessage = error.response?.data?.error || "An error occurred";
+        console.error("Logout API Error:", error);
+        toast.error(errorMessage);
+        
+        return rejectWithValue(errorMessage);
+      } finally {
+        dispatch({ type: "auth/logout" });
       }
     }
   );
-
-
+  
 
 const authSlice = createSlice({
     name : "auth",
@@ -44,6 +44,11 @@ const authSlice = createSlice({
         clearAuthState : (state) => {
             state.otpDetails = null
         }
+    },
+    extraReducers : (builder) => {
+        builder.addCase(logoutEntity.fulfilled,(state) => {
+            state.loading = false
+        })
     }
 })
 

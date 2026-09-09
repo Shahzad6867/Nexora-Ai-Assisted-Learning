@@ -67,6 +67,6 @@ export class CourseRepository extends BaseRepository<ICourseDocument> implements
     return newCourse;
   }
   async update(course_id : string,course: Course): Promise<ICourseDocument | null> {
-    return await CourseModel.findOneAndUpdate({ course_id }, course);
+    return await CourseModel.findOneAndUpdate({ course_id }, course,{returnDocument : "after"});
   }
 }

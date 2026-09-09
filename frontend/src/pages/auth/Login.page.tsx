@@ -33,7 +33,7 @@ export default function LoginPage() {
   const path = location.pathname.split("/");
   const role = path[1];
   const onSubmit = async (data: LoginFormInputs) => {
-    try {
+
       data.role = role;
       const response = await api.post(`/login`, data);
       dispatch(setToken(response.data));
@@ -43,10 +43,6 @@ export default function LoginPage() {
       }
       role === "student" ? navigate("/") : navigate(`/${role}/dashboard`);
       toast.success(response.data.message);
-    } catch (error) {
-      console.log(error.response);
-      toast.error(error?.response?.data?.error);
-    }
   };
   const onError = (errors: FieldErrors<LoginFormInputs>) => {
     const errorValues = Object.values(errors);

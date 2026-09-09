@@ -12,7 +12,7 @@ import { InstitutionToolbar } from "../../components/institution/InstitutionTool
 
 export default function CourseListPage() {
   const navigate = useNavigate();
-  const {courses} = useSelector((state : RootState) => state.institution)
+  const {institution,courses} = useSelector((state : RootState) => state.institution)
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -21,7 +21,7 @@ export default function CourseListPage() {
 
 
   return (
-    <InstitutionLayout name="Courses">
+    <InstitutionLayout name={institution?.institution_name}>
       <div className="page-header">
         <div>
           <h1>Courses</h1>
@@ -50,7 +50,7 @@ export default function CourseListPage() {
 
       <div className="course-grid">
         {courses.map((course, i) => (
-          <CourseCard key={course.course_id} course={course} coverIndex={i} onManage={() => navigate(`institution/courses/${course.course_id}`)} />
+          <CourseCard key={course.course_id} course={course} coverIndex={i} onManage={() => navigate(`/institution/courses/${course.course_id}`)} />
         ))}
         {courses.length === 0 && (
           <p style={{ color: "var(--muted)", fontSize: 12 }}>No courses found</p>

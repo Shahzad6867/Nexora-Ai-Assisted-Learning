@@ -4,7 +4,7 @@ interface InstitutionTopbarProps {
 }
 
 export default function InstitutionTopbar({
-  name = "Dubai Institute of Technology"
+  name = "University"
 }: InstitutionTopbarProps) {
   const splittedName = name.split(" ")
   console.log(splittedName)

@@ -18,7 +18,6 @@ export const authMiddleware = (
     const token = authHeader.split(" ")[1]
     try {
         const payload = jwt.verify(token,env.JWT_ACCESS_SECRET_KEY)
-        console.log(payload)
         next()
     } catch (error : any) {
         if(error instanceof jwt.TokenExpiredError){

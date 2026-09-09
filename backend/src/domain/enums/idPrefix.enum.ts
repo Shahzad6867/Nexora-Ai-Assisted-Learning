@@ -3,6 +3,9 @@ export enum IdPrefix {
     INSTITUTION = "INSTIT",
     STUDENT = "STUD",
     REQUEST = "REQ",
-    COURSE = "COURSE"
+    COURSE = "COURSE",
+    MODULE = "MODULE",
+    SUBJECT = "SUBJECT",
+    CHAPTER = "CHAPTER"
 
 }

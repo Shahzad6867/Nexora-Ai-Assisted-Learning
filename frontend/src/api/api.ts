@@ -24,7 +24,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    console.log(error.response);
+
     if (
       error.response?.data?.statusCode === 401 &&
       (error.response?.data?.error === "ACCESS_TOKEN_EXPIRED" ||
@@ -46,6 +46,8 @@ api.interceptors.response.use(
         store.dispatch({ type: "auth/logout" });
         return Promise.reject(refreshError);
       }
+    } else {
+      toast.error(error.response.data.error);
     }
   }
 );

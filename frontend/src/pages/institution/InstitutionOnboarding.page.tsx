@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import "../../styles/InstitutionOnboarding.css";
+import "../../styles/institution/InstitutionOnboarding.css";
 import { useForm, type FieldErrors } from "react-hook-form";
 import api from "../../api/api";
 import { useDispatch, useSelector } from "react-redux";

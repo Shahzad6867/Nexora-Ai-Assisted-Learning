@@ -13,7 +13,7 @@ export class CreateAccessTokenUseCase implements ICreateAccessTokenUseCase {
   async execute(refreshToken?: string): Promise<Result<string>> {
     try {
       if(!refreshToken){
-        throw new AppError("Refresh token missing, Please log in",HTTP_STATUS_CODES.UNAUTHORIZED)
+        throw new AppError("Session expired - Please log in",HTTP_STATUS_CODES.UNAUTHORIZED)
       }
       const expiresIn = env.JWT_ACCESS_EXPIRES_IN as any;
       const payload = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET_KEY) as CustomJWTPayload

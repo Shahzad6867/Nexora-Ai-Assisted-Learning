@@ -31,25 +31,34 @@ import api from "./api/api";
 import { setLoadingFalse, setToken } from "./features/authSlice";
 import type { RootState } from "./app/store";
 import LoadingPage from "./pages/Loader/Loading.page";
+import CourseDetailsPage from "./pages/institution/CourseDetailsPage";
+import ModuleDetailsPage from "./pages/institution/ModuleDetailsPage";
+import SubjectListPage from "./pages/instructor/Subjects.page";
+import SubjectDetailPage from "./pages/instructor/SubjectDetailPage";
+import ChapterDetailPage from "./pages/instructor/ChapterDetailPage";
 
 function App() {
-  const dispatch = useDispatch()
-  const {loading} = useSelector((state : RootState) => state.auth)
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state: RootState) => state.auth);
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const response = await api.post("/refresh",{},{withCredentials : true})
+        const response = await api.post(
+          "/refresh",
+          {},
+          { withCredentials: true }
+        );
 
         dispatch(setToken(response.data));
       } catch (error) {
-        dispatch(setLoadingFalse()); 
+        dispatch(setLoadingFalse());
       }
     };
 
     initializeAuth();
-  },[])
-  if(loading){
-    return (<LoadingPage />)
+  }, []);
+  if (loading) {
+    return <LoadingPage />;
   }
   return (
     <>
@@ -67,7 +76,6 @@ function App() {
           },
         }}
       />
-
 
       <Routes>
         <Route
@@ -249,7 +257,36 @@ function App() {
           }
         />
 
-          <Route path="/institution/courses" element={<CourseListPage />} />
+        <Route
+          path="/institution/courses"
+          element={
+            <ProtectRoute>
+              <RestrictInstitutionRoute>
+                <CourseListPage />
+              </RestrictInstitutionRoute>
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/institution/courses/:_id"
+          element={
+            <ProtectRoute>
+              <RestrictInstitutionRoute>
+                <CourseDetailsPage />
+              </RestrictInstitutionRoute>
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/institution/courses/:courseId/modules/:moduleId"
+          element={
+            <ProtectRoute>
+              <RestrictInstitutionRoute>
+                <ModuleDetailsPage />
+              </RestrictInstitutionRoute>
+            </ProtectRoute>
+          }
+        />
         {/* Instructor Side */}
         <Route
           path="/instructor/dashboard"
@@ -261,8 +298,37 @@ function App() {
             </ProtectRoute>
           }
         />
+        <Route
+          path="/instructor/subjects"
+          element={
+            <ProtectRoute>
+              <RestrictInstructorRoute>
+                <SubjectListPage />
+              </RestrictInstructorRoute>
+            </ProtectRoute>
+          }
+        />
+        <Route
+        path="/instructor/subjects/:subjectId"
+        element={
+          <ProtectRoute>
+            <RestrictInstructorRoute>
+              <SubjectDetailPage />
+            </RestrictInstructorRoute>
+          </ProtectRoute>
+        }
+      />
+      <Route
+        path="/instructor/subjects/:subjectId/chapters/:chapterId"
+        element={
+          <ProtectRoute>
+            <RestrictInstructorRoute>
+              <ChapterDetailPage />
+            </RestrictInstructorRoute>
+          </ProtectRoute>
+        }
+      />
       </Routes>
-
     </>
   );
 }

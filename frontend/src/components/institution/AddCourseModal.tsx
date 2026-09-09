@@ -13,7 +13,7 @@ import { fetchEntities } from "../../features/institutionSlice";
 interface CourseFormModalProps {
   isOpen: boolean;
   mode: "create" | "edit";
-  initialCourse?: string;
+  initialCourse?: any;
   onClose: () => void;
 }
 
@@ -23,15 +23,20 @@ export default function AddCourseModal({
   initialCourse,
   onClose,
 }: CourseFormModalProps) {
-  const { handleSubmit, reset, register } = useForm();
-  const {token} = useSelector((state : RootState) => state.auth)
+  const { handleSubmit, reset, register, setValues } = useForm();
+  const { token } = useSelector((state: RootState) => state.auth);
   const institutionToken = jwtDecode(token) as CustomJwtPayload;
   const dispatch = useDispatch<AppDispatch>();
 
   const onSubmit = async (data: CourseFormData) => {
     try {
-      data.institution_id = institutionToken._id;
-      const response = await api.post("/courses/new", data);
+      if (mode === "create") {
+        data.institution_id = institutionToken._id;
+      }
+      const response =
+        mode === "create"
+          ? await api.post("/courses/new", data)
+          : await api.put(`/courses/${initialCourse.course_id}`, data);
       toast.success(response.data.message);
       dispatch(fetchEntities(institutionToken._id));
       onClose();
@@ -55,6 +60,10 @@ export default function AddCourseModal({
       }
     }
   };
+
+  if (mode === "edit" && initialCourse) {
+    setValues(initialCourse);
+  }
 
   return (
     <Modal

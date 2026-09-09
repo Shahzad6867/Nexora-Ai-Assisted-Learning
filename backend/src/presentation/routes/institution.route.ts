@@ -11,4 +11,5 @@ router.patch("/:_id",authMiddleware,InstitutionController.updateInstitutionProfi
 router.post("/instructor/new",authMiddleware,InstitutionController.createInstructor.bind(InstitutionController))
 
 
+
 export default router

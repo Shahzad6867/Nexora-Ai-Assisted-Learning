@@ -206,25 +206,32 @@ export type CourseStatus = "published" | "draft";
 export const COURSE_CATEGORIES = ["Technology", "Data Science", "Business", "Design"] as const;
 export type CourseCategory = (typeof COURSE_CATEGORIES)[number];
 
+export type ChapterStatus = "draft" | "published";
+
+export interface Chapter {
+  subject_id: string;
+  chapter_id: string;
+  chapter_name: string;
+  chapter_pdf: string | null;
+  chapter_tutorial: string | null;
+  is_published: boolean | string;
+}
+
 export interface Subject {
-  id: string;
-  name: string;
-  instructorName: string;
-  /** Optional — not collected on original form, added so the chapter
-   *  count shown on the card is actually real data instead of static text. */
-  chapterCount: number;
+  subject_id: string;
+  subject_name: string;
+  instructor_id: string;
+  chapters ?: any[];
 }
 
 export interface Module {
-  id: string;
-  name: string;
-  /** Optional short description — added because the card design shows
-   *  one, but the original "Add Module" modal never collected it. */
+  module_id: string;
+  course_id : string;
+  module_name: string;
   description: string;
-  totalMarks: number;
-  passingMarks: number;
-  assignmentRequired: boolean;
-  subjects: Subject[];
+  total_marks: number;
+  passing_marks: number;
+  assignment_required: boolean;
 }
 
 
@@ -240,17 +247,19 @@ export interface CourseFormData {
 }
 
 export interface ModuleFormData {
-  name: string;
+  course_id ?: string;
+  module_name: string;
   description: string;
-  totalMarks: number;
-  passingMarks: number;
-  assignmentRequired: boolean;
+  total_marks: number;
+  passing_marks: number;
+  assignment_required: boolean;
 }
 
 export interface SubjectFormData {
-  name: string;
-  instructorName: string;
-  chapterCount: number;
+  module_id ? : string,
+  subject_name : string;
+  description : string;
+  instructor_id: string;
 }
 
 export const INSTRUCTOR_OPTIONS = [
